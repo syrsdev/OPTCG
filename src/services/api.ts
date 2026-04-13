@@ -24,8 +24,12 @@ class ApiTCGService {
   private api: AxiosInstance;
 
   constructor() {
+    const isProduction = import.meta.env.PROD;
+    const baseURL = isProduction
+      ? "https://apitcg.com/api/one-piece" // Production: direct API
+      : import.meta.env.VITE_API_BASE_URL;
     this.api = axios.create({
-      baseURL: import.meta.env.VITE_API_BASE_URL,
+      baseURL,
       headers: {
         "Content-Type": "application/json",
         "x-api-key": import.meta.env.VITE_API_TCG_KEY,
