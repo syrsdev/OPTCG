@@ -34,7 +34,7 @@ class ApiTCGService {
         "Content-Type": "application/json",
         "x-api-key": import.meta.env.VITE_API_TCG_KEY,
       },
-      timeout: 10000,
+      timeout: 150000,
     });
     this.setupInterceptors();
   }
