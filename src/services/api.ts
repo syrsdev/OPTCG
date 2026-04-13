@@ -26,7 +26,7 @@ class ApiTCGService {
   constructor() {
     const isProduction = import.meta.env.PROD;
     const baseURL = isProduction
-      ? "https://apitcg.com/api/one-piece" // Production: direct API
+      ? "https://apitcg.com/api/one-piece"
       : import.meta.env.VITE_API_BASE_URL;
     this.api = axios.create({
       baseURL,
