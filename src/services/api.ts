@@ -25,15 +25,10 @@ class ApiTCGService {
 
   constructor() {
     const isProduction = import.meta.env.PROD;
-
-    // 🎯 Production: CORS proxy + API key via query param
-    // Development: Vite proxy + API key via header
     const baseURL = isProduction
       ? "https://api.codetabs.com/v1/proxy?quest=https://apitcg.com/api/one-piece"
       : import.meta.env.VITE_API_BASE_URL;
 
-    // 🛡️ Headers: hanya kirim x-api-key di development
-    // Di production, API key dikirim via query param (lihat fetchCards)
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -45,7 +40,7 @@ class ApiTCGService {
     this.api = axios.create({
       baseURL,
       headers,
-      timeout: 15000, // 15 detik (bukan 150 detik!)
+      timeout: 15000,
     });
 
     this.setupInterceptors();
@@ -98,13 +93,11 @@ class ApiTCGService {
       const defaultLimit = 20;
       const page = params.page || 1;
 
-      // 🎯 Production: tambahkan API key via query param
       const isProduction = import.meta.env.PROD;
       const requestParams = {
         ...cleanParams,
         page,
         limit: defaultLimit,
-        // ✅ Kirim API key via query param untuk production
         ...(isProduction && { api_key: import.meta.env.VITE_API_TCG_KEY }),
       };
 
