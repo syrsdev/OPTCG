@@ -25,10 +25,15 @@ class ApiTCGService {
 
   constructor() {
     const isProduction = import.meta.env.PROD;
+
+    // 🎯 Production: CORS proxy + API key via query param
+    // Development: Vite proxy + API key via header
     const baseURL = isProduction
-      ? "https://api.allorigins.win/raw?url=https://apitcg.com/api/one-piece"
+      ? "https://api.codetabs.com/v1/proxy?quest=https://apitcg.com/api/one-piece"
       : import.meta.env.VITE_API_BASE_URL;
 
+    // 🛡️ Headers: hanya kirim x-api-key di development
+    // Di production, API key dikirim via query param (lihat fetchCards)
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -40,7 +45,7 @@ class ApiTCGService {
     this.api = axios.create({
       baseURL,
       headers,
-      timeout: 15000,
+      timeout: 15000, // 15 detik (bukan 150 detik!)
     });
 
     this.setupInterceptors();
@@ -91,12 +96,20 @@ class ApiTCGService {
       );
 
       const defaultLimit = 20;
+      const page = params.page || 1;
+
+      // 🎯 Production: tambahkan API key via query param
+      const isProduction = import.meta.env.PROD;
+      const requestParams = {
+        ...cleanParams,
+        page,
+        limit: defaultLimit,
+        // ✅ Kirim API key via query param untuk production
+        ...(isProduction && { api_key: import.meta.env.VITE_API_TCG_KEY }),
+      };
+
       const response = await this.api.get<ApiTCGResponse<unknown>>("/cards", {
-        params: {
-          ...cleanParams,
-          page: params.page || 1,
-          limit: params.limit || defaultLimit,
-        },
+        params: requestParams,
         signal,
       });
 
@@ -125,7 +138,6 @@ class ApiTCGService {
         );
 
       const total = Number(response.data?.total) || 0;
-      const page = Number(response.data?.page) || params.page || 1;
       const limit = Number(response.data?.limit) || defaultLimit;
       const totalPages =
         total > 0 ? Math.ceil(total / limit) : cards.length > 0 ? page : 1;
@@ -150,6 +162,7 @@ class ApiTCGService {
           },
         };
       }
+      console.error("fetchCards error:", error);
       throw error;
     }
   }
