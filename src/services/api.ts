@@ -28,14 +28,21 @@ class ApiTCGService {
     const baseURL = isProduction
       ? "https://api.allorigins.win/raw?url=https://apitcg.com/api/one-piece"
       : import.meta.env.VITE_API_BASE_URL;
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (import.meta.env.DEV) {
+      headers["x-api-key"] = import.meta.env.VITE_API_TCG_KEY;
+    }
+
     this.api = axios.create({
       baseURL,
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": import.meta.env.VITE_API_TCG_KEY,
-      },
-      timeout: 150000,
+      headers,
+      timeout: 15000,
     });
+
     this.setupInterceptors();
   }
 
